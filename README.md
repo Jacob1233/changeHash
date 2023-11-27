@@ -1,4 +1,3 @@
 # changeHash
-Change hash of files with nodejs
-
-node changeHash.js exampleDirectory/
+Change sha256 hash of files with nodejs by adding random bytes
+`node changeHash.js relativeDirectory/`
