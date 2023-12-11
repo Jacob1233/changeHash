@@ -15,5 +15,5 @@ Examples
 - `node changeHash.js f demoFile.txt`
 - `node changeHash.js f /home/admin/Documents/demoFile.txt -a`
 - `node changeHash.js d files/`
-- `node changeHash.js d /home/admin/Documents/Files -a`
-- `node changeHash.js d /home/admin/Documents/Files -ar`
+- `node changeHash.js d /home/admin/Documents/Files/ -a`
+- `node changeHash.js d /home/admin/Documents/Files/ -ar`
