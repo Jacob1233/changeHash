@@ -5,33 +5,32 @@ const { createHash } = require('node:crypto');
 const { randomBytes } = require('node:crypto');
 const { Buffer } = require('node:buffer');
 
-if (process.argv[2] == "-r") {  // user selected to include subfolders
-    if (process.argv[3]) {
-        const targetDirectory = `${__dirname}/${process.argv[3].toString()}`;
-        if (targetDirectory.slice(-1).localeCompare('/') < 1) {
-            executeRecursive(targetDirectory);
-        } else {
-            console.log("Please make sure your path ends in /");
+try {
+    if (process.argv[2] == "f") {                                           // user selected single file
+        if (process.argv[4] == "-a") {                                      // user selected absolute path
+            const targetFile = `${process.argv[3].toString()}`;
+            executeSingleFile(targetFile);
+        } else {                                                            // user selected relative path
+            const targetFile = `${__dirname}/${process.argv[3].toString()}`;
+            executeSingleFile(targetFile);
         }
-    } else {
-        console.log("Please make sure you include a path");
+    } else if (process.argv[2] == "d") {                                    //user selected a directory
+        if (process.argv[4] == "-r") {                                      // user selected recursion
+            const targetDirectory = `${__dirname}/${process.argv[3].toString()}`;
+            executeRecursive(targetDirectory);
+        } else if ((process.argv[4] == "-ra" || process.argv[4] == "-ar")) { // user selected recursion and absolute path
+            const targetDirectory = `${process.argv[3].toString()}`;
+            executeRecursive(targetDirectory);
+        } else if ((process.argv[4] == "-a")) {                             // user selected absolute path
+            const targetDirectory = `${process.argv[3].toString()}`;
+            executeNonRecursive(targetDirectory);
+        } else {                                                            // exclude nested directories
+            const targetDirectory = `${__dirname}/${process.argv[3].toString()}`;
+            executeNonRecursive(targetDirectory);
+        }
     }
-} else if (process.argv[2] == "-f") {   // user selected single file mode
-    if (process.argv[3]) {
-        const targetFile = `${__dirname}/${process.argv[3].toString()}`;
-        executeSingleFile(targetFile);
-    } else {
-        console.log("Please make sure you include a path");
-    }
-} else if (process.argv[2]) {   // user opted to exclude subfolders
-    const targetDirectory = `${__dirname}/${process.argv[2].toString()}`;
-    if (targetDirectory.slice(-1).localeCompare('/') < 1) {
-        executeNonRecursive(targetDirectory);
-    } else {
-        console.log("Please make sure your path ends in /");
-    }
-} else {
-    console.log("Improper argument");
+} catch (err) {
+    displayUsageInstructions(err);
 }
 
 function appendBytesToBuffer(data) { 
@@ -99,4 +98,9 @@ function executeSingleFile(fileName) {
     console.log(`\n${process.argv[3].toString()}`);
     console.log(`Old SHA256: ${currentHash.digest('hex')}`);
     console.log(`New SHA256: ${newHash.digest('hex')}`);
+}
+
+function displayUsageInstructions(err) {
+    console.log(err['message']);
+    console.log("see https://github.com/Jacob1233/changeHash for usage instructions");
 }
