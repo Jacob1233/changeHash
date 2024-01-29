@@ -6,28 +6,53 @@ const { randomBytes } = require('node:crypto');
 const { Buffer } = require('node:buffer');
 
 try {
-    if (process.argv[2] == "f") {                                           // user selected single file
-        if (process.argv[4] == "-a") {                                      // user selected absolute path
-            const targetFile = `${process.argv[3].toString()}`;
-            executeSingleFile(targetFile);
-        } else {                                                            // user selected relative path
-            const targetFile = `${__dirname}/${process.argv[3].toString()}`;
-            executeSingleFile(targetFile);
+    if (process.argv[2] == "n") {
+        let absolutePath = false;
+        let directory = false;
+        let recursion = false;
+
+        try {
+            if (process.argv[4].indexOf("a") > -1) {
+                absolutePath = true;
+            }
+            if (process.argv[4].indexOf("d") > -1) {
+                directory = true;
+            }
+            if (process.argv[4].indexOf("r") > -1) {
+                recursion = true;
+            } 
+        } catch (err) {
+            // no flags given
         }
-    } else if (process.argv[2] == "d") {                                    //user selected a directory
-        if (process.argv[4] == "-r") {                                      // user selected recursion
-            const targetDirectory = `${__dirname}/${process.argv[3].toString()}`;
-            executeRecursive(targetDirectory);
-        } else if ((process.argv[4] == "-ra" || process.argv[4] == "-ar")) { // user selected recursion and absolute path
-            const targetDirectory = `${process.argv[3].toString()}`;
-            executeRecursive(targetDirectory);
-        } else if ((process.argv[4] == "-a")) {                             // user selected absolute path
-            const targetDirectory = `${process.argv[3].toString()}`;
-            executeNonRecursive(targetDirectory);
-        } else {                                                            // exclude nested directories
-            const targetDirectory = `${__dirname}/${process.argv[3].toString()}`;
-            executeNonRecursive(targetDirectory);
+
+        if (absolutePath) {
+            if (directory) {
+                const targetDirectory = `${process.argv[3].toString()}`;
+                if (recursion) {
+                    executeRecursive(targetDirectory);
+                } else {
+                    executeNonRecursive(targetDirectory);
+                }
+            } else {
+                const targetFile = `${process.argv[3].toString()}`;
+                executeSingleFile(targetFile);
+            }
+        } else {
+            if (directory) {
+                const targetDirectory = `${__dirname}/${process.argv[3].toString()}`;
+                if (recursion) {
+                    executeRecursive(targetDirectory);
+                } else {
+                    executeNonRecursive(targetDirectory);
+                }
+            } else {
+                const targetFile = `${__dirname}/${process.argv[3].toString()}`;
+                executeSingleFile(targetFile);
+            }
         }
+    } else {
+        console.log("No or incorrect option given");
+        console.log("see https://github.com/Jacob1233/changeHash for usage instructions");
     }
 } catch (err) {
     displayUsageInstructions(err);
@@ -41,50 +66,42 @@ function appendBytesToBuffer(data) {
 }
 
 function executeRecursive(targetDirectory) {
-    try {
-        readdirSync(targetDirectory).forEach(fileName => {
-            try {
-                let currentFile = readFileSync(targetDirectory + fileName);
-                let newFile = appendBytesToBuffer(currentFile);
-                let currentHash = createHash('sha256');
-                let newHash = createHash('sha256');              
-                writeFileSync(targetDirectory + fileName, newFile);
-                currentHash.update(currentFile);
-                newHash.update(newFile);
-                console.log(`\n${fileName}`);
-                console.log(`Old SHA256: ${currentHash.digest('hex')}`);
-                console.log(`New SHA256: ${newHash.digest('hex')}`);
-            } catch (err) {
-                let td = `${targetDirectory}/${fileName}/`;
-                executeRecursive(td);
-            }        
-        }); 
-    } catch (err) {
-        console.log("Please make sure your path is relative and correct");
-    } 
+    readdirSync(targetDirectory).forEach(fileName => {
+        try {
+            let currentFile = readFileSync(targetDirectory + fileName);
+            let newFile = appendBytesToBuffer(currentFile);
+            let currentHash = createHash('sha256');
+            let newHash = createHash('sha256');              
+            writeFileSync(targetDirectory + fileName, newFile);
+            currentHash.update(currentFile);
+            newHash.update(newFile);
+            console.log(`\n${fileName}`);
+            console.log(`Old SHA256: ${currentHash.digest('hex')}`);
+            console.log(`New SHA256: ${newHash.digest('hex')}`);
+        } catch (err) {
+            let td = `${targetDirectory}/${fileName}/`;
+            executeRecursive(td);
+        }        
+    }); 
 }
 
 function executeNonRecursive(targetDirectory) {
-    try {
-        readdirSync(targetDirectory).forEach(fileName => {
-            try {
-                let currentFile = readFileSync(targetDirectory + fileName);
-                let newFile = appendBytesToBuffer(currentFile);
-                let currentHash = createHash('sha256');
-                let newHash = createHash('sha256');              
-                writeFileSync(targetDirectory + fileName, newFile);
-                currentHash.update(currentFile);
-                newHash.update(newFile);
-                console.log(`\n${fileName}`);
-                console.log(`Old SHA256: ${currentHash.digest('hex')}`);
-                console.log(`New SHA256: ${newHash.digest('hex')}`);
-            } catch (err) {
-                console.log(`\nIgnored ${fileName}/`);
-            }        
-        }); 
-    } catch (err) {
-        console.log("Please make sure your path is relative and correct");
-    } 
+    readdirSync(targetDirectory).forEach(fileName => {
+        try {
+            let currentFile = readFileSync(targetDirectory + fileName);
+            let newFile = appendBytesToBuffer(currentFile);
+            let currentHash = createHash('sha256');
+            let newHash = createHash('sha256');              
+            writeFileSync(targetDirectory + fileName, newFile);
+            currentHash.update(currentFile);
+            newHash.update(newFile);
+            console.log(`\n${fileName}`);
+            console.log(`Old SHA256: ${currentHash.digest('hex')}`);
+            console.log(`New SHA256: ${newHash.digest('hex')}`);
+        } catch (err) {
+            console.log(`\nIgnored ${fileName}/`);
+        }        
+    }); 
 }
 
 function executeSingleFile(fileName) {

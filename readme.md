@@ -1,19 +1,15 @@
 # changeHash.js
-### embeds data in files to change the sha256 checksum
+### adds random bytes to files to change the sha256 checksum
 
-usage `node changeHash.js operation path flags`
+usage `node changeHash.js option path flags`
 
 Operations
-- f for single file
-- d for directory
+- n adds random bytes to the end of the file 
 
 Flags
+- d for directory
 - r for recursion
 - a for absolute path
 
-Examples
-- `node changeHash.js f demoFile.txt`
-- `node changeHash.js f /home/admin/Documents/demoFile.txt -a`
-- `node changeHash.js d files/`
-- `node changeHash.js d /home/admin/Documents/Files/ -a`
-- `node changeHash.js d /home/admin/Documents/Files/ -ar`
+New Examples
+- `node changeHash.js n /home/admin/Documents/Files/ -adr` n for new hash command and adr flags for absolute path, directory, and recursive
